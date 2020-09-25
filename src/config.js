@@ -7,4 +7,5 @@ module.exports = {
   TEST_DATABASE_URL:
     process.env.TEST_DATABASE_URL ||
     "postgresql://postgres@localhost/thinktanktest",
+  JWT_SECRET: process.env.JWT_SECRET || "change-this-secret",
 };
