@@ -4,20 +4,27 @@ const morgan = require("morgan");
 const cors = require("cors");
 const helmet = require("helmet");
 const { NODE_ENV } = require("./config");
+//loading routers
+const usersRouter = require("./users/users-router");
+const decksRouter = require("./decks/decks-router");
+const cardsRouter = require("./cards/cards-router");
 
+//express instance
 const app = express();
-//set up env variables for local and heroku
+
+//Morgan settings
 const morganOption = NODE_ENV === "production" ? "tiny" : "common";
 
+//middleware
 app.use(morgan(morganOption));
 app.use(helmet());
 app.use(cors());
 
-app.get("/", (req, res) => {
-  res.send("Hello, world!");
-});
-// ERROR HANDLING: SHOW DETAILED ERRORS IN DEVELOPMENT,
-// NON DETAILED MESSAGES IN PRODUCTION FOR SECURITY
+//routers
+app.use("/api/users", usersRouter);
+app.use("/api/decks", decksRouter);
+//app.use("/api/cards", cardsRouter);
+// ERROR HANDLING
 app.use(function errorHandler(error, req, res, next) {
   let response;
   if (NODE_ENV === "production") {
