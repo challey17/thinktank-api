@@ -12,6 +12,7 @@ const serializeUser = (user) => ({
   password: xss(user.password),
 });
 
+// new user registers, signup
 usersRouter.post("/", jsonBodyParser, (req, res, next) => {
   const { password, username } = req.body;
 

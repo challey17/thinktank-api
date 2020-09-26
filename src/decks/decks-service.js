@@ -1,3 +1,16 @@
-const DecksService = {};
+const DecksService = {
+  insertDeck(knex, newDeck) {
+    return knex
+      .insert(newDeck)
+      .into("decks")
+      .returning("*")
+      .then((rows) => {
+        return rows[0];
+      });
+  },
+  getByUser(knex, user_id) {
+    return knex.from("decks").select("*").where("user_id", user_id);
+  },
+};
 
 module.exports = DecksService;
