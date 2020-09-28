@@ -34,7 +34,7 @@ cardsRouter.route("/").post(jsonParser, (req, res, next) => {
     .catch(next);
 });
 
-// - [ ] Post- create new card, send deck_id in req
+// - [DONE, fix res.json ] Post- create new card, send deck_id in req
 //   - [ ] Get all cards by deckid
 // - [ ] Patch - edit card question/answer
 // - [ ] Delete - delete card
