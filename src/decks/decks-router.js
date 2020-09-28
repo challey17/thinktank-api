@@ -34,7 +34,6 @@ decksRouter.route("/").post(jsonParser, (req, res, next) => {
 
 decksRouter
   .route("/:id")
-
   .get((req, res, next) => {
     // req.params.id is user_id
     DecksService.getByUser(req.app.get("db"), req.params.id)
@@ -48,18 +47,25 @@ decksRouter
       })
       .catch(next);
   })
-  .put((req, res, next) => {
-    // will use req.params.id as a post id
-    PostsService.updatePost(req.app.get("db"), req.params.id, req.body)
-      .then(() => res.send(204))
+  .put(jsonParser, (req, res, next) => {
+    const newDeckName = req.body;
+    // id from decks table
+    DecksService.updateDeckName(req.app.get("db"), req.params.id, newDeckName)
+      .then(() => res.status(204))
+      .catch(next);
+  })
+  .delete((req, res, next) => {
+    // id is from decks table
+    DecksService.deleteDeck(req.app.get("db"), req.params.id)
+      .then((numRowsAffected) => {
+        res.status(204).end();
+      })
       .catch(next);
   });
 // Decks
 // - [ DONE] Post new deck
-// - [ ] Get decks, get all decks by userid
-// - [ ] Patch - update deckname by deckid
-// - [ ] Delete- delete deck by deckid
-
-//decks = id, user_id, deckname
+// - [ DONE] Get decks, get all decks by userid
+// - [ DONE ] Put - update deckname by deckid
+// - [ DONE] Delete- delete deck by deckid
 
 module.exports = decksRouter;
