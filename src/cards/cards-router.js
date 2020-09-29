@@ -36,8 +36,8 @@ cardsRouter.route("/").post(jsonParser, (req, res, next) => {
 
 cardsRouter
   .route("/:id")
+  //all cards by deckId
   .get((req, res, next) => {
-    // will use req.params.id as a user id
     CardsService.getByDeckId(req.app.get("db"), req.params.id)
       .then((cards) => {
         if (!cards) {

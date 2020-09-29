@@ -3,6 +3,8 @@ const express = require("express");
 const DecksService = require("./decks-service");
 const xss = require("xss");
 
+const { requireAuth } = require("../middleware/jwt-auth");
+
 const decksRouter = express.Router();
 const jsonParser = express.json();
 
@@ -12,9 +14,9 @@ const serializeDeck = (deck) => ({
   deckname: xss(deck.deckname),
 });
 
-decksRouter.route("/").post(jsonParser, (req, res, next) => {
-  const { user_id, deckname } = req.body;
-  const newDeck = { user_id, deckname };
+decksRouter.route("/").post(requireAuth, jsonParser, (req, res, next) => {
+  const { deckname } = req.body;
+  const newDeck = { user_id: req.user.id, deckname };
 
   for (const [key, value] of Object.entries(newDeck))
     if (value == null)
