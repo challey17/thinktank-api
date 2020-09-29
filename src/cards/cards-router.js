@@ -17,26 +17,56 @@ cardsRouter.route("/").post(jsonParser, (req, res, next) => {
   const [{ deck_id, question, answer }, ...rest] = req.body;
   const newCards = [{ deck_id, question, answer }, ...rest];
 
-  for (const [key, value] of Object.entries(newCard))
+  for (const [key, value] of Object.entries(newCards))
     if (value == null)
       return res.status(400).json({
         error: { message: `Missing '${key}' in request body` },
       });
 
   CardsService.insertCard(req.app.get("db"), newCards)
-    .then((card) => {
+    .then((cards) => {
       res
         .status(201)
-        .location(path.posix.join(req.originalUrl, `/${card.id}`))
-        // need to return all all cards from array
-        .json(serializeCard(card));
+        .location(path.posix.join(req.originalUrl, `/${cards.id}`))
+        // need to return all cards from array?
+        .json(serializeCard(cards));
     })
     .catch(next);
 });
 
-// - [DONE, fix res.json ] Post- create new card, send deck_id in req
-//   - [ ] Get all cards by deckid
-// - [ ] Patch - edit card question/answer
-// - [ ] Delete - delete card
+cardsRouter
+  .route("/:id")
+  .get((req, res, next) => {
+    // will use req.params.id as a user id
+    CardsService.getByDeckId(req.app.get("db"), req.params.id)
+      .then((cards) => {
+        if (!cards) {
+          return res.status(404).json({
+            error: { message: `deck doesn't exist` },
+          });
+        }
+        res.json(cards.map(serializeCard));
+      })
+      .catch(next);
+  })
+  .put(jsonParser, (req, res, next) => {
+    const { question, answer } = req.body;
+    const updatedCard = { question, answer };
+    CardsService.updateCard(req.app.get("db"), req.params.id, updatedCard)
+      .then(() => res.send(204))
+      .catch(next);
+  })
+  .delete((req, res, next) => {
+    CardsService.deleteCard(req.app.get("db"), req.params.id)
+      .then((numRowsAffected) => {
+        res.status(204).end();
+      })
+      .catch(next);
+  });
+
+// - [DONE, fix res.json? ] Post- create new card, send deck_id in req
+//   - [ DONE] Get all cards by deckid
+// - [ DONE ] Put - edit card question/answer
+// - [ DONE ] Delete - delete card
 
 module.exports = cardsRouter;
