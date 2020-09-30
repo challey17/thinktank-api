@@ -2,6 +2,7 @@ const path = require("path");
 const express = require("express");
 const CardsService = require("./cards-service");
 const xss = require("xss");
+const { requireAuth } = require("../middleware/jwt-auth");
 
 const cardsRouter = express.Router();
 const jsonParser = express.json();
@@ -13,7 +14,7 @@ const serializeCard = (card) => ({
   answer: xss(card.answer),
 });
 // req.body is an array
-cardsRouter.route("/").post(jsonParser, (req, res, next) => {
+cardsRouter.route("/").post(requireAuth, jsonParser, (req, res, next) => {
   const [{ deck_id, question, answer }, ...rest] = req.body;
   const newCards = [{ deck_id, question, answer }, ...rest];
 
@@ -37,7 +38,7 @@ cardsRouter.route("/").post(jsonParser, (req, res, next) => {
 cardsRouter
   .route("/:id")
   //all cards by deckId
-  .get((req, res, next) => {
+  .get(requireAuth, (req, res, next) => {
     CardsService.getByDeckId(req.app.get("db"), req.params.id)
       .then((cards) => {
         if (!cards) {
@@ -49,14 +50,14 @@ cardsRouter
       })
       .catch(next);
   })
-  .put(jsonParser, (req, res, next) => {
+  .put(requireAuth, jsonParser, (req, res, next) => {
     const { question, answer } = req.body;
     const updatedCard = { question, answer };
     CardsService.updateCard(req.app.get("db"), req.params.id, updatedCard)
       .then(() => res.send(204))
       .catch(next);
   })
-  .delete((req, res, next) => {
+  .delete(requireAuth, (req, res, next) => {
     CardsService.deleteCard(req.app.get("db"), req.params.id)
       .then((numRowsAffected) => {
         res.status(204).end();

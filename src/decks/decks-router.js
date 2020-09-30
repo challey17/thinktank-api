@@ -36,7 +36,7 @@ decksRouter.route("/").post(requireAuth, jsonParser, (req, res, next) => {
 
 decksRouter
   .route("/:id")
-  .get((req, res, next) => {
+  .get(requireAuth, (req, res, next) => {
     // req.params.id is user_id
     DecksService.getByUser(req.app.get("db"), req.params.id)
       .then((decks) => {
@@ -49,14 +49,14 @@ decksRouter
       })
       .catch(next);
   })
-  .put(jsonParser, (req, res, next) => {
+  .put(requireAuth, jsonParser, (req, res, next) => {
     const newDeckName = req.body;
     // id from decks table
     DecksService.updateDeckName(req.app.get("db"), req.params.id, newDeckName)
       .then(() => res.status(204))
       .catch(next);
   })
-  .delete((req, res, next) => {
+  .delete(requireAuth, (req, res, next) => {
     // id is from decks table
     DecksService.deleteDeck(req.app.get("db"), req.params.id)
       .then((numRowsAffected) => {
