@@ -13,11 +13,11 @@ const serializeUser = (user) => ({
   password: xss(user.password),
 });
 
-// new user registers, signup
 usersRouter
   .get("/", requireAuth, (req, res, next) => {
     res.json(req.user);
   })
+  // new user registers, signup
   .post("/", jsonBodyParser, (req, res, next) => {
     const { password, username } = req.body;
 
