@@ -1,7 +1,10 @@
 const CardsService = {
-  insertCard(knex, newCards) {
+  getAllCards(knex) {
+    return knex("cards").select("*");
+  },
+  insertCard(knex, newCard) {
     return knex
-      .insert(newCards)
+      .insert(newCard)
       .into("cards")
       .returning("*")
       .then((rows) => {

@@ -1,4 +1,8 @@
 const DecksService = {
+  getAllDecks(knex) {
+    return knex("decks").select("*");
+  },
+
   insertDeck(knex, newDeck) {
     return knex
       .insert(newDeck)

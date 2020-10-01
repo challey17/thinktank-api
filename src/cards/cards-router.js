@@ -14,26 +14,35 @@ const serializeCard = (card) => ({
   answer: xss(card.answer),
 });
 // req.body is an array
-cardsRouter.route("/").post(requireAuth, jsonParser, (req, res, next) => {
-  const [{ deck_id, question, answer }, ...rest] = req.body;
-  const newCards = [{ deck_id, question, answer }, ...rest];
+cardsRouter
+  .route("/")
+  .get((req, res, next) => {
+    CardsService.getAllCards(req.app.get("db"))
+      .then((cards) => {
+        res.json(cards.map(serializeCard));
+      })
+      .catch(next);
+  })
+  .post(requireAuth, jsonParser, (req, res, next) => {
+    const { deck_id, question, answer } = req.body;
+    const newCard = { deck_id, question, answer };
 
-  for (const [key, value] of Object.entries(newCards))
-    if (value == null)
-      return res.status(400).json({
-        error: { message: `Missing '${key}' in request body` },
-      });
+    for (const [key, value] of Object.entries(newCard))
+      if (value == null)
+        return res.status(400).json({
+          error: { message: `Missing '${key}' in request body` },
+        });
 
-  CardsService.insertCard(req.app.get("db"), newCards)
-    .then((cards) => {
-      res
-        .status(201)
-        .location(path.posix.join(req.originalUrl, `/${cards.id}`))
-        // need to return all cards from array?
-        .json(serializeCard(cards));
-    })
-    .catch(next);
-});
+    CardsService.insertCard(req.app.get("db"), newCard)
+      .then((cards) => {
+        res
+          .status(201)
+          .location(path.posix.join(req.originalUrl, `/${cards.id}`))
+
+          .json(serializeCard(cards));
+      })
+      .catch(next);
+  });
 
 cardsRouter
   .route("/:id")

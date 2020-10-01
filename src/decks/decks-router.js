@@ -14,25 +14,34 @@ const serializeDeck = (deck) => ({
   deckname: xss(deck.deckname),
 });
 
-decksRouter.route("/").post(requireAuth, jsonParser, (req, res, next) => {
-  const { deckname } = req.body;
-  const newDeck = { user_id: req.user.id, deckname };
+decksRouter
+  .route("/")
+  .get((req, res, next) => {
+    DecksService.getAllDecks(req.app.get("db"))
+      .then((decks) => {
+        res.json(decks.map(serializeDeck));
+      })
+      .catch(next);
+  })
+  .post(requireAuth, jsonParser, (req, res, next) => {
+    const { deckname } = req.body;
+    const newDeck = { user_id: req.user.id, deckname };
 
-  for (const [key, value] of Object.entries(newDeck))
-    if (value == null)
-      return res.status(400).json({
-        error: { message: `Missing '${key}' in request body` },
-      });
+    for (const [key, value] of Object.entries(newDeck))
+      if (value == null)
+        return res.status(400).json({
+          error: { message: `Missing '${key}' in request body` },
+        });
 
-  DecksService.insertDeck(req.app.get("db"), newDeck)
-    .then((deck) => {
-      res
-        .status(201)
-        .location(path.posix.join(req.originalUrl, `/${deck.id}`))
-        .json(serializeDeck(deck));
-    })
-    .catch(next);
-});
+    DecksService.insertDeck(req.app.get("db"), newDeck)
+      .then((deck) => {
+        res
+          .status(201)
+          .location(path.posix.join(req.originalUrl, `/${deck.id}`))
+          .json(serializeDeck(deck));
+      })
+      .catch(next);
+  });
 
 decksRouter
   .route("/:id")
@@ -50,10 +59,10 @@ decksRouter
       .catch(next);
   })
   .put(requireAuth, jsonParser, (req, res, next) => {
-    const newDeckName = req.body;
+    const deckname = req.body;
     // id from decks table
-    DecksService.updateDeckName(req.app.get("db"), req.params.id, newDeckName)
-      .then(() => res.status(204))
+    DecksService.updateDeckName(req.app.get("db"), req.params.id, deckname)
+      .then(() => res.send(204))
       .catch(next);
   })
   .delete(requireAuth, (req, res, next) => {
