@@ -53,3 +53,10 @@
 //     });
 //   });
 // });
+
+//TESTS
+// GET - ALL DECKS
+//POST -CREATE NEW DECK
+//GET -DECK BY USERID
+//PUT - UPDATE DECK NAME
+// DELETE DECK

@@ -1,55 +1,59 @@
-// const knex = require("knex");
-// const app = require("../src/app");
-// const { makeUsersArray } = require("./users.fixture");
-// const { requireAuth } = require("../src/middleware/jwt-auth");
-// const jwt = require("jsonwebtoken");
-// describe("users Endpoints", function () {
-//   let db;
+const knex = require("knex");
+const app = require("../src/app");
+const { makeUsersArray } = require("./users.fixture");
+const { requireAuth } = require("../src/middleware/jwt-auth");
+const jwt = require("jsonwebtoken");
+describe("users Endpoints", function () {
+  let db;
+  let authToken;
 
-//   before("make knex instance", () => {
-//     db = knex({
-//       client: "pg",
-//       connection: process.env.TEST_DATABASE_URL,
-//     });
-//     app.set("db", db);
-//   });
+  before("make knex instance", () => {
+    db = knex({
+      client: "pg",
+      connection: process.env.TEST_DATABASE_URL,
+    });
+    app.set("db", db);
+  });
 
-//   after("disconnect from db", () => db.destroy());
+  after("disconnect from db", () => db.destroy());
 
-//   before("clean the table", () =>
-//     db.raw("TRUNCATE users RESTART IDENTITY CASCADE")
-//   );
+  before("clean the table", () =>
+    db.raw("TRUNCATE users RESTART IDENTITY CASCADE")
+  );
 
-//   afterEach("cleanup", () => db.raw("TRUNCATE users RESTART IDENTITY CASCADE"));
+  beforeEach("create and authorize a user", () => {
+    const testUsers = makeUsersArray();
+    return supertest(app)
+      .post("/api/users")
+      .send(testUsers[0])
+      .then((res) => {
+        return supertest(app)
+          .post("/api/login")
+          .send(testUsers[0])
+          .then((res2) => {
+            return (authToken = res2.body.authToken);
+          });
+      });
+  });
 
-//   describe(`GET /api/users`, () => {
-//     context(`Given an existing user`, () => {
-//       const testUsers = makeUsersArray();
+  afterEach("cleanup", () => db.raw("TRUNCATE users RESTART IDENTITY CASCADE"));
 
-//       function createJwt(subject, payload) {
-//         return jwt.sign(payload, process.env.JWT_SECRET, {
-//           subject,
-//           algorithm: "HS256",
-//         });
-//       }
-//       //const subject = { username: "chayce" };
-//       const payload = { id: 1 };
-//       beforeEach("insert users", () => {
-//         return db.into("users").insert(testUsers[0]);
-//       });
+  describe(`GET /api/users`, () => {
+    context(`Given an existing user`, () => {
+      const testUsers = makeUsersArray();
 
-//       it(`confirms auth token`, () => {
-//         return supertest(app)
-//           .get("/api/users")
-//           .set("Authorization", ` Bearer ${createJwt("chayce", payload)}`)
-//           .send(testUsers[0])
-//           .expect((res) => {
-//             expect(res.body).to.eql(testUsers[0]);
-//           });
-//       });
-//     });
-//   });
-// });
+      it(`confirms auth token`, () => {
+        return supertest(app)
+          .get("/api/users")
+          .set("Authorization", `Bearer ${authToken}`)
+          .expect((res) => {
+            expect(res.body.username).to.eql(testUsers[0].username);
+          });
+      });
+    });
+  });
+});
 
-// // test cases
-// // GET ,responds with req.user?
+// test cases
+// GET ,responds with req.user?
+// POST, password username sent, creates new user
