@@ -73,10 +73,5 @@ decksRouter
       })
       .catch(next);
   });
-// Decks
-// - [ DONE] Post new deck
-// - [ DONE] Get decks, get all decks by userid
-// - [ DONE ] Put - update deckname by deckid
-// - [ DONE] Delete- delete deck by deckid
 
 module.exports = decksRouter;

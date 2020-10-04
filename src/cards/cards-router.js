@@ -74,9 +74,4 @@ cardsRouter
       .catch(next);
   });
 
-// - [DONE, fix res.json? ] Post- create new card, send deck_id in req
-//   - [ DONE] Get all cards by deckid
-// - [ DONE ] Put - edit card question/answer
-// - [ DONE ] Delete - delete card
-
 module.exports = cardsRouter;

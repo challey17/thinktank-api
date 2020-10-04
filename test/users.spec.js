@@ -1,8 +1,7 @@
 const knex = require("knex");
 const app = require("../src/app");
 const { makeUsersArray } = require("./users.fixture");
-const { requireAuth } = require("../src/middleware/jwt-auth");
-const jwt = require("jsonwebtoken");
+
 describe("users Endpoints", function () {
   let db;
   let authToken;
@@ -53,7 +52,3 @@ describe("users Endpoints", function () {
     });
   });
 });
-
-// test cases
-// GET ,responds with req.user?
-// POST, password username sent, creates new user
